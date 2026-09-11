@@ -1,0 +1,1937 @@
+<div id="octo3d-widget">
+  <div class="octo3d-stage"></div>
+
+  <div class="octo3d-top">
+    <div class="octo3d-info">
+      <div class="octo3d-kicker">
+        Interactive 3D
+      </div>
+
+      <div class="octo3d-title">
+        Octopus Designer
+      </div>
+
+      <div class="octo3d-description">
+        Trascina per ruotare e usa la rotella o il pinch per zoomare.
+      </div>
+    </div>
+
+    <div class="octo3d-actions">
+      <button
+        class="octo3d-button octo3d-rotate"
+        type="button"
+        aria-label="Attiva o disattiva rotazione automatica"
+        title="Rotazione automatica"
+      >
+        Pausa
+      </button>
+
+      <button
+        class="octo3d-button octo3d-reset"
+        type="button"
+        aria-label="Ripristina vista"
+        title="Ripristina vista"
+      >
+        Reset
+      </button>
+
+      <button
+        class="octo3d-button octo3d-fullscreen"
+        type="button"
+        aria-label="Visualizza a schermo intero"
+        title="Schermo intero"
+      >
+        Fullscreen
+      </button>
+    </div>
+  </div>
+
+  <div class="octo3d-help">
+    <span>Trascina · ruota</span>
+    <span>Rotella · zoom</span>
+    <span>Pinch · zoom mobile</span>
+  </div>
+
+  <div class="octo3d-loading">
+    <div class="octo3d-loader">
+      <div class="octo3d-spinner"></div>
+
+      <div class="octo3d-loader-title">
+        Caricamento modello 3D…
+      </div>
+
+      <div class="octo3d-loader-status">
+        Connessione…
+      </div>
+
+      <div class="octo3d-progress-track">
+        <div class="octo3d-progress"></div>
+      </div>
+
+      <div class="octo3d-error"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ============================================================
+     OCTOPUS 3D — ELEMENTOR WIDGET
+     ============================================================ */
+
+  #octo3d-widget {
+    --octo-height: 720px;
+
+    --octo-background-top: #ffffff;
+    --octo-background-bottom: #ececef;
+
+    --octo-panel: rgba(255, 255, 255, 0.80);
+    --octo-border: rgba(255, 255, 255, 0.90);
+
+    --octo-text: #202024;
+    --octo-muted: #77777d;
+
+    --octo-accent: #d9aa22;
+
+    position: relative;
+
+    width: 100%;
+    height: var(--octo-height);
+
+    min-height: 420px;
+
+    overflow: hidden;
+
+    border-radius: 24px;
+
+    background:
+      radial-gradient(
+        circle at 50% 25%,
+        var(--octo-background-top) 0%,
+        #f7f7f8 48%,
+        var(--octo-background-bottom) 100%
+      );
+
+    color: var(--octo-text);
+
+    font-family:
+      Inter,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      Arial,
+      sans-serif;
+
+    isolation: isolate;
+  }
+
+  #octo3d-widget *,
+  #octo3d-widget *::before,
+  #octo3d-widget *::after {
+    box-sizing: border-box;
+  }
+
+  #octo3d-widget .octo3d-stage {
+    position: absolute;
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+  }
+
+  #octo3d-widget canvas {
+    display: block;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    outline: none;
+
+    touch-action: none;
+
+    cursor: grab;
+  }
+
+  #octo3d-widget canvas:active {
+    cursor: grabbing;
+  }
+
+  /* ============================================================
+     TOP UI
+     ============================================================ */
+
+  #octo3d-widget .octo3d-top {
+    position: absolute;
+    z-index: 20;
+
+    top: 18px;
+    left: 18px;
+    right: 18px;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    pointer-events: none;
+  }
+
+  #octo3d-widget .octo3d-info,
+  #octo3d-widget .octo3d-actions {
+    pointer-events: auto;
+  }
+
+  #octo3d-widget .octo3d-info {
+    width: min(360px, calc(100% - 330px));
+
+    padding: 17px 19px;
+
+    border: 1px solid var(--octo-border);
+    border-radius: 20px;
+
+    background: var(--octo-panel);
+
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+
+    box-shadow:
+      0 20px 60px rgba(30, 35, 45, 0.12);
+  }
+
+  #octo3d-widget .octo3d-kicker {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    margin-bottom: 6px;
+
+    color: #927018;
+
+    font-size: 10px;
+    line-height: 1;
+    font-weight: 800;
+
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  #octo3d-widget .octo3d-kicker::before {
+    content: "";
+
+    display: block;
+
+    width: 7px;
+    height: 7px;
+
+    flex: 0 0 auto;
+
+    border-radius: 50%;
+
+    background:
+      linear-gradient(
+        135deg,
+        #ffe681,
+        #c58a00
+      );
+
+    box-shadow:
+      0 0 0 4px rgba(220, 170, 30, 0.13);
+  }
+
+  #octo3d-widget .octo3d-title {
+    font-size: clamp(21px, 2vw, 29px);
+    line-height: 1;
+
+    font-weight: 800;
+    letter-spacing: -0.045em;
+  }
+
+  #octo3d-widget .octo3d-description {
+    max-width: 310px;
+
+    margin-top: 9px;
+
+    color: var(--octo-muted);
+
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  /* ============================================================
+     BUTTONS
+     ============================================================ */
+
+  #octo3d-widget .octo3d-actions {
+    display: flex;
+
+    gap: 6px;
+
+    padding: 6px;
+
+    border: 1px solid var(--octo-border);
+    border-radius: 16px;
+
+    background: rgba(255, 255, 255, 0.78);
+
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+
+    box-shadow:
+      0 18px 55px rgba(30, 35, 45, 0.12);
+  }
+
+  #octo3d-widget .octo3d-button {
+    appearance: none;
+
+    min-height: 40px;
+
+    padding: 0 13px;
+
+    border: 0;
+    border-radius: 11px;
+
+    cursor: pointer;
+
+    color: #ffffff;
+
+    background:
+      linear-gradient(
+        135deg,
+        #29292e,
+        #111114
+      );
+
+    font-family: inherit;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    white-space: nowrap;
+
+    transition:
+      transform 0.18s ease,
+      background 0.18s ease,
+      box-shadow 0.18s ease;
+  }
+
+  #octo3d-widget .octo3d-button:hover {
+    transform: translateY(-1px);
+
+    background:
+      linear-gradient(
+        135deg,
+        #3b3b42,
+        #1c1c20
+      );
+
+    box-shadow:
+      0 8px 20px rgba(0, 0, 0, 0.16);
+  }
+
+  #octo3d-widget .octo3d-button:active {
+    transform: translateY(0);
+  }
+
+  #octo3d-widget .octo3d-rotate {
+    color: #322600;
+
+    background:
+      linear-gradient(
+        135deg,
+        #f5d45f,
+        #d3a01b
+      );
+  }
+
+  #octo3d-widget .octo3d-rotate:hover {
+    background:
+      linear-gradient(
+        135deg,
+        #ffe37a,
+        #d9a51d
+      );
+  }
+
+  /* ============================================================
+     HELP
+     ============================================================ */
+
+  #octo3d-widget .octo3d-help {
+    position: absolute;
+    z-index: 15;
+
+    left: 50%;
+    bottom: 18px;
+
+    transform: translateX(-50%);
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 9px 13px;
+
+    border: 1px solid var(--octo-border);
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.74);
+
+    -webkit-backdrop-filter: blur(15px);
+    backdrop-filter: blur(15px);
+
+    box-shadow:
+      0 12px 35px rgba(0, 0, 0, 0.08);
+
+    color: #696970;
+
+    font-size: 10px;
+    line-height: 1;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+
+    pointer-events: none;
+  }
+
+  #octo3d-widget .octo3d-help span + span::before {
+    content: "•";
+
+    margin-right: 8px;
+
+    color: var(--octo-accent);
+  }
+
+  /* ============================================================
+     LOADER
+     ============================================================ */
+
+  #octo3d-widget .octo3d-loading {
+    position: absolute;
+    z-index: 100;
+
+    inset: 0;
+
+    display: grid;
+    place-items: center;
+
+    background:
+      radial-gradient(
+        circle at 50% 35%,
+        #ffffff 0%,
+        #f4f4f6 72%
+      );
+
+    transition:
+      opacity 0.45s ease,
+      visibility 0.45s ease;
+  }
+
+  #octo3d-widget .octo3d-loading.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+
+    pointer-events: none;
+  }
+
+  #octo3d-widget .octo3d-loader {
+    width: min(330px, calc(100% - 40px));
+
+    padding: 24px;
+
+    text-align: center;
+
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: 22px;
+
+    background: rgba(255, 255, 255, 0.75);
+
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+
+    box-shadow:
+      0 25px 80px rgba(0, 0, 0, 0.10);
+  }
+
+  #octo3d-widget .octo3d-spinner {
+    width: 42px;
+    height: 42px;
+
+    margin: 0 auto 16px;
+
+    border: 4px solid #dfdfe3;
+    border-top-color: var(--octo-accent);
+    border-radius: 50%;
+
+    animation:
+      octo3d-spinner-animation 0.8s linear infinite;
+  }
+
+  @keyframes octo3d-spinner-animation {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  #octo3d-widget .octo3d-loader-title {
+    margin-bottom: 6px;
+
+    color: #444449;
+
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  #octo3d-widget .octo3d-loader-status {
+    min-height: 18px;
+
+    margin-bottom: 14px;
+
+    color: #88888f;
+
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  #octo3d-widget .octo3d-progress-track {
+    width: 100%;
+    height: 6px;
+
+    overflow: hidden;
+
+    border-radius: 999px;
+
+    background: #dfdfe3;
+  }
+
+  #octo3d-widget .octo3d-progress {
+    width: 0%;
+    height: 100%;
+
+    border-radius: inherit;
+
+    background:
+      linear-gradient(
+        90deg,
+        #ca9211,
+        #f3cf59
+      );
+
+    transition:
+      width 0.15s ease;
+  }
+
+  #octo3d-widget .octo3d-error {
+    display: none;
+
+    margin-top: 14px;
+
+    padding: 12px;
+
+    border-radius: 12px;
+
+    background: #fff0f0;
+    color: #922929;
+
+    font-size: 11px;
+    line-height: 1.5;
+
+    text-align: left;
+  }
+
+  #octo3d-widget .octo3d-error.is-visible {
+    display: block;
+  }
+
+  /* ============================================================
+     FULLSCREEN
+     ============================================================ */
+
+  #octo3d-widget:fullscreen {
+    width: 100vw;
+    height: 100vh;
+
+    border-radius: 0;
+  }
+
+  #octo3d-widget:-webkit-full-screen {
+    width: 100vw;
+    height: 100vh;
+
+    border-radius: 0;
+  }
+
+  /* ============================================================
+     TABLET
+     ============================================================ */
+
+  @media (max-width: 900px) {
+    #octo3d-widget {
+      --octo-height: 650px;
+    }
+
+    #octo3d-widget .octo3d-info {
+      width: min(280px, calc(100% - 280px));
+    }
+
+    #octo3d-widget .octo3d-description {
+      display: none;
+    }
+  }
+
+  /* ============================================================
+     MOBILE
+     ============================================================ */
+
+  @media (max-width: 767px) {
+    #octo3d-widget {
+      --octo-height: 580px;
+
+      min-height: 500px;
+
+      border-radius: 18px;
+    }
+
+    #octo3d-widget .octo3d-top {
+      top: 10px;
+      left: 10px;
+      right: 10px;
+
+      gap: 8px;
+    }
+
+    #octo3d-widget .octo3d-info {
+      width: auto;
+      max-width: 180px;
+
+      padding: 11px 13px;
+
+      border-radius: 15px;
+    }
+
+    #octo3d-widget .octo3d-kicker {
+      font-size: 7px;
+    }
+
+    #octo3d-widget .octo3d-title {
+      font-size: 16px;
+    }
+
+    #octo3d-widget .octo3d-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+
+      padding: 4px;
+    }
+
+    #octo3d-widget .octo3d-button {
+      min-height: 31px;
+
+      padding: 0 9px;
+
+      font-size: 8px;
+    }
+
+    #octo3d-widget .octo3d-help {
+      bottom: 10px;
+
+      max-width: calc(100% - 20px);
+
+      padding: 8px 10px;
+
+      font-size: 8px;
+    }
+
+    #octo3d-widget .octo3d-help span:last-child {
+      display: none;
+    }
+  }
+
+  @media (max-width: 430px) {
+    #octo3d-widget {
+      --octo-height: 540px;
+    }
+  }
+</style>
+
+<script type="module">
+  /*
+   * ============================================================
+   * IMPORTANTISSIMO PER ELEMENTOR
+   *
+   * Usiamo esm.sh anziché i file addons di jsDelivr.
+   * esm.sh risolve automaticamente gli import interni di Three.js.
+   * ============================================================
+   */
+
+  import * as THREE
+    from "https://esm.sh/three@0.180.0";
+
+  import { OrbitControls }
+    from "https://esm.sh/three@0.180.0/examples/jsm/controls/OrbitControls.js";
+
+  import { GLTFLoader }
+    from "https://esm.sh/three@0.180.0/examples/jsm/loaders/GLTFLoader.js";
+
+
+  (() => {
+
+    /* ==========================================================
+       CONFIGURAZIONE
+       ========================================================== */
+
+    const MODEL_URL =
+      "https://raw.githubusercontent.com/giuseppebarbieri1965-afk/polpo/refs/heads/main/PolpoLigurbonifiche.glb";
+
+    const root =
+      document.querySelector("#octo3d-widget");
+
+    if (!root) {
+      console.error(
+        "[Octopus 3D] Contenitore non trovato."
+      );
+
+      return;
+    }
+
+    /*
+     * Elementor può reinizializzare il widget
+     * quando si lavora nell'editor.
+     */
+
+    if (root.dataset.octo3dInitialized === "1") {
+      return;
+    }
+
+    root.dataset.octo3dInitialized = "1";
+
+
+    /* ==========================================================
+       ELEMENTI DOM
+       ========================================================== */
+
+    const stage =
+      root.querySelector(".octo3d-stage");
+
+    const loading =
+      root.querySelector(".octo3d-loading");
+
+    const spinner =
+      root.querySelector(".octo3d-spinner");
+
+    const loaderTitle =
+      root.querySelector(".octo3d-loader-title");
+
+    const loaderStatus =
+      root.querySelector(".octo3d-loader-status");
+
+    const progress =
+      root.querySelector(".octo3d-progress");
+
+    const errorBox =
+      root.querySelector(".octo3d-error");
+
+    const rotateButton =
+      root.querySelector(".octo3d-rotate");
+
+    const resetButton =
+      root.querySelector(".octo3d-reset");
+
+    const fullscreenButton =
+      root.querySelector(".octo3d-fullscreen");
+
+
+    /* ==========================================================
+       SCENA
+       ========================================================== */
+
+    const scene =
+      new THREE.Scene();
+
+    scene.background =
+      new THREE.Color(0xf3f3f5);
+
+
+    /* ==========================================================
+       CAMERA
+       ========================================================== */
+
+    const camera =
+      new THREE.PerspectiveCamera(
+        35,
+        1,
+        0.01,
+        1000
+      );
+
+
+    /* ==========================================================
+       RENDERER
+       ========================================================== */
+
+    let renderer;
+
+    try {
+
+      renderer =
+        new THREE.WebGLRenderer({
+          antialias: true,
+          alpha: false,
+          powerPreference: "high-performance"
+        });
+
+    } catch (error) {
+
+      console.error(
+        "[Octopus 3D] Errore WebGL:",
+        error
+      );
+
+      displayError(
+        "Questo dispositivo o browser non supporta WebGL."
+      );
+
+      return;
+    }
+
+    renderer.outputColorSpace =
+      THREE.SRGBColorSpace;
+
+    renderer.toneMapping =
+      THREE.ACESFilmicToneMapping;
+
+    renderer.toneMappingExposure =
+      1.05;
+
+    renderer.shadowMap.enabled =
+      true;
+
+    renderer.shadowMap.type =
+      THREE.PCFSoftShadowMap;
+
+    stage.appendChild(
+      renderer.domElement
+    );
+
+
+    /* ==========================================================
+       CONTROLLI
+       ========================================================== */
+
+    const controls =
+      new OrbitControls(
+        camera,
+        renderer.domElement
+      );
+
+    controls.enableDamping =
+      true;
+
+    controls.dampingFactor =
+      0.055;
+
+    controls.enablePan =
+      false;
+
+    controls.rotateSpeed =
+      0.72;
+
+    controls.zoomSpeed =
+      0.9;
+
+    /*
+     * Rotazione automatica iniziale.
+     */
+
+    controls.autoRotate =
+      true;
+
+    controls.autoRotateSpeed =
+      0.7;
+
+
+    /* ==========================================================
+       LUCI
+       ========================================================== */
+
+    const hemisphereLight =
+      new THREE.HemisphereLight(
+        0xffffff,
+        0x87838d,
+        2.25
+      );
+
+    scene.add(
+      hemisphereLight
+    );
+
+
+    const keyLight =
+      new THREE.DirectionalLight(
+        0xffffff,
+        3.2
+      );
+
+    keyLight.position.set(
+      5,
+      8,
+      7
+    );
+
+    keyLight.castShadow =
+      true;
+
+    keyLight.shadow.mapSize.set(
+      1024,
+      1024
+    );
+
+    keyLight.shadow.bias =
+      -0.0001;
+
+    scene.add(
+      keyLight
+    );
+
+
+    const fillLight =
+      new THREE.DirectionalLight(
+        0xffddbd,
+        1.1
+      );
+
+    fillLight.position.set(
+      -5,
+      4,
+      5
+    );
+
+    scene.add(
+      fillLight
+    );
+
+
+    const rimLight =
+      new THREE.DirectionalLight(
+        0xdbe8ff,
+        1.25
+      );
+
+    rimLight.position.set(
+      5,
+      6,
+      -7
+    );
+
+    scene.add(
+      rimLight
+    );
+
+
+    /* ==========================================================
+       PAVIMENTO
+       ========================================================== */
+
+    const floorMaterial =
+      new THREE.MeshStandardMaterial({
+        color: 0xe9e9ec,
+        roughness: 0.95,
+        metalness: 0
+      });
+
+
+    const floor =
+      new THREE.Mesh(
+        new THREE.CircleGeometry(
+          10,
+          64
+        ),
+        floorMaterial
+      );
+
+    floor.rotation.x =
+      -Math.PI / 2;
+
+    floor.receiveShadow =
+      true;
+
+    scene.add(
+      floor
+    );
+
+
+    /* ==========================================================
+       MODELLO
+       ========================================================== */
+
+    let model = null;
+
+    let modelSize = 1;
+
+    const modelGroup =
+      new THREE.Group();
+
+    scene.add(
+      modelGroup
+    );
+
+
+    /*
+     * Posizioni usate per il reset.
+     */
+
+    const homeCameraPosition =
+      new THREE.Vector3();
+
+    const homeTarget =
+      new THREE.Vector3();
+
+
+    /* ==========================================================
+       LOADER GLB
+       ========================================================== */
+
+    const loader =
+      new GLTFLoader();
+
+
+    loader.load(
+      MODEL_URL,
+
+      (gltf) => {
+
+        console.log(
+          "[Octopus 3D] GLB caricato correttamente.",
+          gltf
+        );
+
+        model =
+          gltf.scene;
+
+        if (!model) {
+
+          displayError(
+            "Il GLB non contiene una scena 3D valida."
+          );
+
+          return;
+        }
+
+
+        /*
+         * Ombre e materiali.
+         */
+
+        model.traverse(
+          (object) => {
+
+            if (!object.isMesh) {
+              return;
+            }
+
+            object.castShadow =
+              true;
+
+            object.receiveShadow =
+              true;
+
+
+            const materials =
+              Array.isArray(object.material)
+                ? object.material
+                : [object.material];
+
+
+            materials.forEach(
+              (material) => {
+
+                if (!material) {
+                  return;
+                }
+
+                /*
+                 * Non alteriamo le texture
+                 * incorporate nel GLB.
+                 */
+
+                material.needsUpdate =
+                  true;
+
+              }
+            );
+
+          }
+        );
+
+
+        modelGroup.add(
+          model
+        );
+
+
+        /*
+         * Importantissimo:
+         * facciamo prima il resize del canvas,
+         * POI calcoliamo la camera.
+         */
+
+        resizeRenderer();
+
+        fitModelToScreen(
+          model
+        );
+
+
+        progress.style.width =
+          "100%";
+
+        loaderStatus.textContent =
+          "Modello pronto";
+
+
+        window.setTimeout(
+          () => {
+
+            loading.classList.add(
+              "is-hidden"
+            );
+
+          },
+          350
+        );
+
+      },
+
+
+      /*
+       * PROGRESS
+       */
+
+      (xhr) => {
+
+        const loadedMB =
+          xhr.loaded /
+          1024 /
+          1024;
+
+
+        if (
+          xhr.lengthComputable &&
+          xhr.total > 0
+        ) {
+
+          const totalMB =
+            xhr.total /
+            1024 /
+            1024;
+
+
+          const percentage =
+            Math.min(
+              100,
+              (
+                xhr.loaded /
+                xhr.total
+              ) * 100
+            );
+
+
+          progress.style.width =
+            `${percentage}%`;
+
+
+          loaderStatus.textContent =
+            `${Math.round(percentage)}% · ${loadedMB.toFixed(1)} / ${totalMB.toFixed(1)} MB`;
+
+        } else {
+
+          loaderStatus.textContent =
+            `${loadedMB.toFixed(1)} MB scaricati`;
+
+        }
+
+      },
+
+
+      /*
+       * ERROR
+       */
+
+      (error) => {
+
+        console.error(
+          "[Octopus 3D] Errore caricamento GLB:",
+          error
+        );
+
+
+        displayError(
+          "Il modello non è stato caricato. Apri la console del browser per vedere il dettaglio tecnico."
+        );
+
+      }
+    );
+
+
+    /* ==========================================================
+       FIT MODEL
+       ========================================================== */
+
+    function fitModelToScreen(object) {
+
+      object.updateMatrixWorld(
+        true
+      );
+
+
+      let box =
+        new THREE.Box3()
+          .setFromObject(
+            object
+          );
+
+
+      if (box.isEmpty()) {
+
+        displayError(
+          "Il modello GLB non contiene geometrie visualizzabili."
+        );
+
+        return;
+      }
+
+
+      let center =
+        box.getCenter(
+          new THREE.Vector3()
+        );
+
+
+      /*
+       * Centra X e Z.
+       */
+
+      object.position.x -=
+        center.x;
+
+      object.position.z -=
+        center.z;
+
+
+      /*
+       * Appoggia il modello al pavimento.
+       */
+
+      object.position.y -=
+        box.min.y;
+
+
+      object.updateMatrixWorld(
+        true
+      );
+
+
+      /*
+       * Nuovo bounding box.
+       */
+
+      box =
+        new THREE.Box3()
+          .setFromObject(
+            object
+          );
+
+
+      const size =
+        box.getSize(
+          new THREE.Vector3()
+        );
+
+
+      center =
+        box.getCenter(
+          new THREE.Vector3()
+        );
+
+
+      modelSize =
+        Math.max(
+          size.x,
+          size.y,
+          size.z
+        );
+
+
+      if (
+        !Number.isFinite(modelSize) ||
+        modelSize <= 0
+      ) {
+
+        modelSize =
+          1;
+
+      }
+
+
+      /* ========================================================
+         CALCOLO DISTANZA CAMERA
+
+         Tiene conto sia della larghezza
+         sia dell'altezza del modello.
+         ======================================================== */
+
+      const verticalFov =
+        THREE.MathUtils.degToRad(
+          camera.fov
+        );
+
+
+      const horizontalFov =
+        2 *
+        Math.atan(
+          Math.tan(
+            verticalFov / 2
+          ) *
+          camera.aspect
+        );
+
+
+      const distanceHeight =
+        size.y /
+        (
+          2 *
+          Math.tan(
+            verticalFov / 2
+          )
+        );
+
+
+      const distanceWidth =
+        size.x /
+        (
+          2 *
+          Math.tan(
+            horizontalFov / 2
+          )
+        );
+
+
+      let distance =
+        Math.max(
+          distanceHeight,
+          distanceWidth
+        );
+
+
+      /*
+       * Margine visivo.
+       */
+
+      distance *=
+        1.30;
+
+
+      /*
+       * Vista quasi frontale,
+       * leggermente rialzata.
+       */
+
+      const direction =
+        new THREE.Vector3(
+          0.36,
+          0.12,
+          1
+        ).normalize();
+
+
+      camera.position
+        .copy(center)
+        .add(
+          direction.multiplyScalar(
+            distance
+          )
+        );
+
+
+      controls.target.copy(
+        center
+      );
+
+
+      /* ========================================================
+         ZOOM
+         ======================================================== */
+
+      controls.minDistance =
+        modelSize * 0.45;
+
+
+      controls.maxDistance =
+        modelSize * 5;
+
+
+      /* ========================================================
+         CAMERA NEAR/FAR
+         ======================================================== */
+
+      camera.near =
+        Math.max(
+          modelSize / 1000,
+          0.001
+        );
+
+
+      camera.far =
+        Math.max(
+          modelSize * 100,
+          100
+        );
+
+
+      camera.updateProjectionMatrix();
+
+
+      /* ========================================================
+         FLOOR
+         ======================================================== */
+
+      floor.position.y =
+        box.min.y -
+        modelSize * 0.004;
+
+
+      floor.scale.setScalar(
+        Math.max(
+          modelSize / 4,
+          1
+        )
+      );
+
+
+      /* ========================================================
+         RESET POSITION
+         ======================================================== */
+
+      homeCameraPosition.copy(
+        camera.position
+      );
+
+
+      homeTarget.copy(
+        controls.target
+      );
+
+
+      controls.update();
+
+    }
+
+
+    /* ==========================================================
+       AUTOROTATE
+       ========================================================== */
+
+    let autoRotate =
+      true;
+
+
+    rotateButton.addEventListener(
+      "click",
+      () => {
+
+        autoRotate =
+          !autoRotate;
+
+
+        controls.autoRotate =
+          autoRotate;
+
+
+        rotateButton.textContent =
+          autoRotate
+            ? "Pausa"
+            : "Ruota";
+
+      }
+    );
+
+
+    /*
+     * Quando l'utente interagisce,
+     * fermiamo temporaneamente
+     * l'autorotazione.
+     */
+
+    let autoRotateTimeout =
+      null;
+
+
+    controls.addEventListener(
+      "start",
+      () => {
+
+        controls.autoRotate =
+          false;
+
+
+        clearTimeout(
+          autoRotateTimeout
+        );
+
+      }
+    );
+
+
+    controls.addEventListener(
+      "end",
+      () => {
+
+        if (!autoRotate) {
+          return;
+        }
+
+
+        autoRotateTimeout =
+          window.setTimeout(
+            () => {
+
+              controls.autoRotate =
+                true;
+
+            },
+            1800
+          );
+
+      }
+    );
+
+
+    /* ==========================================================
+       RESET CAMERA
+       ========================================================== */
+
+    let resetting =
+      false;
+
+
+    let resetTime =
+      0;
+
+
+    const resetCameraStart =
+      new THREE.Vector3();
+
+
+    const resetTargetStart =
+      new THREE.Vector3();
+
+
+    resetButton.addEventListener(
+      "click",
+      resetView
+    );
+
+
+    function resetView() {
+
+      if (!model) {
+        return;
+      }
+
+
+      resetCameraStart.copy(
+        camera.position
+      );
+
+
+      resetTargetStart.copy(
+        controls.target
+      );
+
+
+      resetTime =
+        0;
+
+
+      resetting =
+        true;
+
+    }
+
+
+    function updateReset(delta) {
+
+      if (!resetting) {
+        return;
+      }
+
+
+      resetTime +=
+        delta * 2.4;
+
+
+      const t =
+        THREE.MathUtils.clamp(
+          resetTime,
+          0,
+          1
+        );
+
+
+      const eased =
+        easeInOutCubic(
+          t
+        );
+
+
+      camera.position.lerpVectors(
+        resetCameraStart,
+        homeCameraPosition,
+        eased
+      );
+
+
+      controls.target.lerpVectors(
+        resetTargetStart,
+        homeTarget,
+        eased
+      );
+
+
+      if (t >= 1) {
+
+        camera.position.copy(
+          homeCameraPosition
+        );
+
+
+        controls.target.copy(
+          homeTarget
+        );
+
+
+        resetting =
+          false;
+
+      }
+
+    }
+
+
+    function easeInOutCubic(t) {
+
+      return t < 0.5
+        ? 4 * t * t * t
+        : 1 -
+          Math.pow(
+            -2 * t + 2,
+            3
+          ) / 2;
+
+    }
+
+
+    /* ==========================================================
+       FULLSCREEN
+       ========================================================== */
+
+    fullscreenButton.addEventListener(
+      "click",
+      async () => {
+
+        try {
+
+          if (!document.fullscreenElement) {
+
+            await root.requestFullscreen();
+
+          } else {
+
+            await document.exitFullscreen();
+
+          }
+
+        } catch (error) {
+
+          console.warn(
+            "[Octopus 3D] Fullscreen non disponibile:",
+            error
+          );
+
+        }
+
+      }
+    );
+
+
+    document.addEventListener(
+      "fullscreenchange",
+      () => {
+
+        fullscreenButton.textContent =
+          document.fullscreenElement
+            ? "Chiudi"
+            : "Fullscreen";
+
+
+        window.setTimeout(
+          resizeRenderer,
+          50
+        );
+
+      }
+    );
+
+
+    /* ==========================================================
+       RESPONSIVE / ELEMENTOR
+       ========================================================== */
+
+    function resizeRenderer() {
+
+      const width =
+        root.clientWidth;
+
+
+      const height =
+        root.clientHeight;
+
+
+      if (
+        width < 2 ||
+        height < 2
+      ) {
+
+        return;
+
+      }
+
+
+      camera.aspect =
+        width / height;
+
+
+      if (width <= 600) {
+
+        camera.fov =
+          43;
+
+      } else if (width <= 900) {
+
+        camera.fov =
+          38;
+
+      } else {
+
+        camera.fov =
+          35;
+
+      }
+
+
+      camera.updateProjectionMatrix();
+
+
+      /*
+       * Importante:
+       * Elementor usa il contenitore,
+       * non window.innerWidth.
+       */
+
+      renderer.setSize(
+        width,
+        height,
+        false
+      );
+
+
+      /*
+       * Limitiamo la risoluzione
+       * su display Retina.
+       */
+
+      renderer.setPixelRatio(
+        Math.min(
+          window.devicePixelRatio || 1,
+          1.75
+        )
+      );
+
+    }
+
+
+    const resizeObserver =
+      new ResizeObserver(
+        () => {
+
+          resizeRenderer();
+
+        }
+      );
+
+
+    resizeObserver.observe(
+      root
+    );
+
+
+    resizeRenderer();
+
+
+    /* ==========================================================
+       PAUSA QUANDO FUORI VIEWPORT
+       ========================================================== */
+
+    let widgetVisible =
+      true;
+
+
+    const intersectionObserver =
+      new IntersectionObserver(
+        (entries) => {
+
+          widgetVisible =
+            entries[0]
+              ?.isIntersecting
+            ?? true;
+
+        },
+        {
+          threshold: 0.01
+        }
+      );
+
+
+    intersectionObserver.observe(
+      root
+    );
+
+
+    /* ==========================================================
+       TASTO R
+       ========================================================== */
+
+    window.addEventListener(
+      "keydown",
+      (event) => {
+
+        if (
+          event.key.toLowerCase()
+          !== "r"
+        ) {
+
+          return;
+
+        }
+
+
+        const rect =
+          root.getBoundingClientRect();
+
+
+        const visible =
+          rect.top <
+            window.innerHeight &&
+          rect.bottom >
+            0;
+
+
+        if (visible) {
+
+          resetView();
+
+        }
+
+      }
+    );
+
+
+    /* ==========================================================
+       ERROR HANDLING
+       ========================================================== */
+
+    function displayError(message) {
+
+      spinner.style.display =
+        "none";
+
+
+      loaderTitle.textContent =
+        "Impossibile visualizzare il modello";
+
+
+      loaderStatus.textContent =
+        "";
+
+
+      progress.style.width =
+        "100%";
+
+
+      progress.style.background =
+        "#d95454";
+
+
+      errorBox.textContent =
+        message;
+
+
+      errorBox.classList.add(
+        "is-visible"
+      );
+
+    }
+
+
+    /* ==========================================================
+       RENDER LOOP
+       ========================================================== */
+
+    const clock =
+      new THREE.Clock();
+
+
+    function renderLoop() {
+
+      requestAnimationFrame(
+        renderLoop
+      );
+
+
+      const delta =
+        Math.min(
+          clock.getDelta(),
+          0.05
+        );
+
+
+      if (!widgetVisible) {
+
+        return;
+
+      }
+
+
+      updateReset(
+        delta
+      );
+
+
+      controls.update();
+
+
+      renderer.render(
+        scene,
+        camera
+      );
+
+    }
+
+
+    renderLoop();
+
+  })();
+</script>
